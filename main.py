@@ -337,6 +337,12 @@ def main():
         ===================================================================================================================
         """
 
+        print('\nTerceira etapa do algoritmo de Myhill-Nerode\n')
+        print('Agora, vamos minimizar o AFD condensando alguns estados em um só.')
+        print('Basta verificar os pares de estados não marcados na matriz, e verificar')
+        print('Se eles possuem estados em comum. Se sim, eles serão condensados em um só.\n')
+        mostra_diagona_inferior(matriz)
+
         estadosAfdMin = [] # Array de arrays de string. Cada um dos sub-arrays representa um dos estados do AFD minimizado (que são estados compostos por estados do AFD original, exemplo: (C, D, E))
 
         estadosUtilizados = {""} # Set de string que guardará todos os estados do AFD original que já foram utilizados nos estados compostos do AFD minimizado, para futura verificação de estados que continuarão isolados no AFD minimizado 
@@ -347,19 +353,23 @@ def main():
                     break
                 
                 if (matriz[i][j] == 0): # Se o par de estados não estiver marcado na matriz, adiciona o array que contém os dois em 'estadosAfdMin', como também adiciona os dois estados em 'estadosUtilizados'
+                    print(f'O par {i} e {j} foi marcado com 0')
                     estadosAfdMin.append([i, j])
                     estadosUtilizados.add(i)
                     estadosUtilizados.add(j)
-
+            
         estadosUtilizados.remove("") # Apenas remove a string vazia que foi adicionada inicialmente para criar o set de string
 
         # Faz a junção de todos os estados do AFD minimizado que possuem alguma interseção de estados do AFD original
 
+        print('\nVamos olhar para as interseções nos estados agora:\n')
+        
         i = 0
         while i < len(estadosAfdMin) - 1: # i vai até len(estadosAfdMin) - 1, pois j recebe i+1 sempre
             j = i + 1
             while j < len(estadosAfdMin):
                 if (set(estadosAfdMin[i]) & set(estadosAfdMin[j])): # Se houver interseção, os estados dos dois arrays de estados são mesclados no primeiro array e o segundo array é excluído
+                    print(f'O par de estados {estadosAfdMin[i]} e {estadosAfdMin[j]} possui interseção, então eles serão mesclados.')
                     estadosAfdMin[i] = list(set(estadosAfdMin[i]).union(set(estadosAfdMin[j])))
                     estadosAfdMin.pop(j)
                 else:
@@ -368,6 +378,7 @@ def main():
 
         # Se algum estado não fizer parte de algum estado composto do AFD minimizado, então ele permanecerá isolado no AFD minimizado
         estadosIsolados = set(afd['estados']) - estadosUtilizados
+        print(f'O(s) estado(s) isolado(s) é(são): {estadosIsolados}')
 
         # Adiciona os estados isolados aos estados do AFD minimizado
         estadosAfdMin.append(list(estadosIsolados))
@@ -379,10 +390,14 @@ def main():
 
             # Se o estado inicial do AFD original faz parte de um dos estados compostos do AFD minimizado, então esse estado composto será o estado inicial do AFD minimizado
             if (afd['inicial'] in estado):
+                print(f'\nO estado inicial {afd["inicial"]} faz parte do estado composto {estado}')
+                print(f'então {estado} será estado inicial do AFD minimizado.')
                 estadoInicialAfdMin.append(estado)
 
             # Se o estado final do AFD original faz parte de um dos estados compostos do AFD minimizado, então esse estado composto será um dos estados finais do AFD minimizado
             if (set(estado) & set(afd['finais'])): # Testa se há interseção entre o estado composto atual com os estados finais do AFD original
+                print(f'\nO estado final {list(set(estado) & set(afd["finais"]))[0]} faz parte do estado composto {estado}, ')
+                print(f'então {estado} será final no AFD minimizado.')
                 estadosFinaisAfdMin.append(estado)
 
         estadosAfdMin1 = [] # Array de strings que representarão cada um dos estados compostos do AFD minimizado. Esse tratamento é feito para acumular o nome do estado composto em apenas uma string
@@ -424,6 +439,9 @@ def main():
         #
         # Onde cada chave inicial indica um estado do AFD que aponta para outro dicionário, onde cada chave representa um símbolo do alfabeto que aponta para o estado de destino da transição
         #
+
+        # print(f'\nQUARTA ETAPA DO ALGORITMO DE MYHILL-NERODE\n')
+        # print(f'Preencher as transições do AFD minimizado:\n')
     
         transicoesAfdMin = {
             
