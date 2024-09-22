@@ -1,7 +1,7 @@
 """
 =====================
 
-LER ARQUIVO TEXT
+LER ARQUIVO TXT
 
 =====================
 """
@@ -66,13 +66,13 @@ VALIDAR AFD
 """
 
 def validar_afd(afd):
-    # Verificar se o estado inicial está nos estados
+    # Verifica se o estado inicial está nos estados
     if afd['inicial'] not in afd['estados']:
         # Se o estado inicial não estiver na lista de estados, imprime um erro e retorna False
         print(f"Erro: Estado inicial '{afd['inicial']}' não está nos estados.")
         return False
 
-    # Verificar se todos os estados finais estão nos estados
+    # Verifica se todos os estados finais estão nos estados
     for final in afd['finais']:
         # Para cada estado final, verifica se ele está na lista de estados
         if final not in afd['estados']:
@@ -80,7 +80,7 @@ def validar_afd(afd):
             print(f"Erro: Estado final '{final}' não está nos estados.")
             return False
 
-    # Verificar se todas as transições são válidas
+    # Verifica se todas as transições são válidas
     for origem, transicoes in afd['transicoes'].items():
 
         # Para cada estado de origem nas transições, verifica se ele está na lista de estados
@@ -89,7 +89,7 @@ def validar_afd(afd):
             print(f"Erro: Estado '{origem}' não está nos estados.")
             return False
         
-        # Verificar se o dicionário de transições tem a mesma quantidade de símbolos que o alfabeto
+        # Verifica se o dicionário de transições tem a mesma quantidade de símbolos que o alfabeto
         if len(transicoes) != len(afd['alfa']):
             print(f"Erro: Estado '{origem}' não possui transições para todos os símbolos do alfabeto.")
             return False
@@ -112,7 +112,7 @@ def validar_afd(afd):
             else:
                 simbolos_vistos[simbolo] = 1
 
-        # Verificar se algum símbolo aparece mais de uma vez
+        # Verifica se algum símbolo aparece mais de uma vez
         for simbolo, quantidade in simbolos_vistos.items():
             if quantidade > 1:
                     print(f"Erro: Símbolo '{simbolo}' aparece mais de uma vez nas transições do estado '{origem}'.")
@@ -134,6 +134,13 @@ from graphviz import Digraph
 def exibir_diagrama_afd(afd, nome_arquivo):
     dot = Digraph(comment=nome_arquivo)
 
+    # Define a direção do layout como da esquerda para a direita (horizontal)
+    dot.attr(rankdir='LR')
+
+    # Define a orientação como "paisagem"
+    dot.attr(size='8.3,5.8')  # A5 landscape
+    dot.attr(ratio='fill')  # Ajusta a escala para preencher a página
+
     # Adiciona um nó inicial invisível
     dot.node('inicio', '', shape='point')  # Um ponto invisível para representar a entrada
     
@@ -147,12 +154,25 @@ def exibir_diagrama_afd(afd, nome_arquivo):
     # Adiciona uma transição do estado inicial invisível para o estado inicial do AFD
     dot.edge('inicio', afd['inicial'])  # Seta do ponto invisível para o estado inicial
     
-    # Adicionar transições
+     # Adiciona transições agrupadas
     for origem, transicoes in afd['transicoes'].items():
         origem_str = str(origem)
+        
+        # Dicionário para agrupar transições
+        transicoes_agrupadas = {}
+
         for simbolo, destino in transicoes.items():
             destino_str = str(destino)
-            dot.edge(origem_str, destino_str, label=simbolo)
+            
+            # Agrupa os símbolos que têm o mesmo destino
+            if destino_str not in transicoes_agrupadas:
+                transicoes_agrupadas[destino_str] = []
+            transicoes_agrupadas[destino_str].append(simbolo)
+        
+        # Adiciona transições agrupadas para o gráfico
+        for destino_str, simbolos in transicoes_agrupadas.items():
+            label = '\n'.join(simbolos)  # Coloca um símbolo por linha
+            dot.edge(origem_str, destino_str, label=label)
     
     # Gera o arquivo
     dot.render(f'{nome_arquivo}.gv', view=True)
@@ -165,7 +185,7 @@ CÓDIGO PRINCIPAL
 =====================
 """
 
-# #################################################
+##################################################
 
 def mostra_matriz(matriz):
     print('   ', end='')
@@ -178,7 +198,7 @@ def mostra_matriz(matriz):
             print(f'{matriz[estado][estado_destino]:>2} ', end='')
         print()
 
-def mostra_diagona_inferior(matriz):
+def mostra_diagonal_inferior(matriz):
     print('   ', end='')
     for estado in matriz:
         print(f'{estado:>2} ', end='')
@@ -224,7 +244,7 @@ def myhill_nerode(afd):
     print('\n\nMatriz após a primeira etapa:\n')
     mostra_matriz(matriz)
     print("Ou, de forma mais compacta:")
-    mostra_diagona_inferior(matriz)
+    mostra_diagonal_inferior(matriz)
     
         
 # #################################################
@@ -239,7 +259,7 @@ def main():
 
     exibir_diagrama_afd(afd, "afd_normal")
 
-    # Validar o AFD
+    # Valida o AFD
     if validar_afd(afd):
         print("AFD válido!")
         print('\nPRIMEIRA ETAPA DO ALGORITMO DE MYHILL-NERODE\n')
@@ -284,7 +304,7 @@ def main():
         print('\n\nMatriz após a primeira etapa:\n')
         mostra_matriz(matriz)
         print("Ou, de forma mais compacta:")
-        mostra_diagona_inferior(matriz)
+        mostra_diagonal_inferior(matriz)
             
         # Implementação do algoritmo
         # 
@@ -341,7 +361,7 @@ def main():
         print('Agora, vamos minimizar o AFD condensando alguns estados em um só.')
         print('Basta verificar os pares de estados não marcados na matriz, e verificar')
         print('Se eles possuem estados em comum. Se sim, eles serão condensados em um só.\n')
-        mostra_diagona_inferior(matriz)
+        mostra_diagonal_inferior(matriz)
 
         estadosAfdMin = [] # Array de arrays de string. Cada um dos sub-arrays representa um dos estados do AFD minimizado (que são estados compostos por estados do AFD original, exemplo: (C, D, E))
 
