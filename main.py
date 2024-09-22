@@ -188,29 +188,39 @@ CÓDIGO PRINCIPAL
 ##################################################
 
 def mostra_matriz(matriz):
+    
+    # Imprime os cabeçalhos das colunas
     print('   ', end='')
     for estado in matriz:
-        print(f'{estado:>2} ', end='')
+        print(f'{estado:>2} ', end='') # Imprime o nome do estado com alinhamento à direita
     print()
+
+    # Imprime a matriz linha por linha
     for estado in matriz:
-        print(f'{estado:>2} ', end='')
+        
+        print(f'{estado:>2} ', end='') # Imprime o nome do estado na linha atual
         for estado_destino in matriz[estado]:
+            # Imprime o valor da matriz na posição [estado][estado_destino] com alinhamento à direita
             print(f'{matriz[estado][estado_destino]:>2} ', end='')
-        print()
+        print() # Pula para a próxima linha
 
 def mostra_diagonal_inferior(matriz):
+    # Imprime os cabeçalhos das colunas
     print('   ', end='')
     for estado in matriz:
-        print(f'{estado:>2} ', end='')
+        print(f'{estado:>2} ', end='') # Imprime o nome do estado com alinhamento à direita
     print()
+    # Imprime apenas os elementos da diagonal inferior da matriz
     for estado in matriz:
-        print(f'{estado:>2} ', end='')
+        print(f'{estado:>2} ', end='') # Imprime o nome do estado na linha atual
         for estado_destino in matriz[estado]:
             if estado_destino < estado:
+                # Imprime o valor da matriz na posição [estado][estado_destino] se estiver na diagonal inferior
                 print(f'{matriz[estado][estado_destino]:>2} ', end='')
             else:
+                # Imprime espaços em branco para manter o alinhamento
                 print('   ', end='')
-        print()
+        print() # Pula para a próxima linha
 
 def myhill_nerode(afd):
     # Inicialmente cria e preenche uma matriz de tamanho estadosxestados
