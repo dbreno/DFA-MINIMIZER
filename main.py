@@ -165,7 +165,75 @@ CÓDIGO PRINCIPAL
 =====================
 """
 
+# #################################################
+
+def mostra_matriz(matriz):
+    print('   ', end='')
+    for estado in matriz:
+        print(f'{estado:>2} ', end='')
+    print()
+    for estado in matriz:
+        print(f'{estado:>2} ', end='')
+        for estado_destino in matriz[estado]:
+            print(f'{matriz[estado][estado_destino]:>2} ', end='')
+        print()
+
+def mostra_diagona_inferior(matriz):
+    print('   ', end='')
+    for estado in matriz:
+        print(f'{estado:>2} ', end='')
+    print()
+    for estado in matriz:
+        print(f'{estado:>2} ', end='')
+        for estado_destino in matriz[estado]:
+            if estado_destino < estado:
+                print(f'{matriz[estado][estado_destino]:>2} ', end='')
+            else:
+                print('   ', end='')
+        print()
+
+def myhill_nerode(afd):
+    # Inicialmente cria e preenche uma matriz de tamanho estadosxestados
+    #  com -1, indicando que todas suas posições são inválidas.
+    matriz = {estado: {estado_destino: -1 for estado_destino in afd['estados']} for estado in afd['estados']}
+    # Posteriormente preencher a matriz com 0 ou 1.
+    passo = 0
+    for estado1 in afd['estados']:
+        for estado2 in afd['estados']:
+            passo += 1
+            print('-' * 50)
+            print(f'Passo {passo}: comparando o estado {estado1} e o estado {estado2}\n')
+            if estado1 == estado2:
+                print('Os estados são iguais então ignoramos.\n')
+                break
+
+            # Se o par de estados contiver exclusivamente um estado final, a matriz é marcada com 1
+            if (estado1 in afd['finais']) != (estado2 in afd['finais']):
+                print(f'O estado {estado1} {'é' if estado1 in afd['finais'] else 'não é'} final e o')
+                print(f'estado {estado2} {'é' if estado2 in afd['finais'] else 'não é'} final')
+                print(f'Logo, a posição {estado1}x{estado2} recebe um 1, matriz atualizada:')
+                matriz[estado1][estado2] = 1
+            # Caso contrário, é marcada com 0
+            else:
+                print(f'O estado {estado1} {'é' if estado1 in afd['finais'] else 'não é'} final e o')
+                print(f'estado {estado2} {'é' if estado2 in afd['finais'] else 'não é'} final')
+                print(f'Logo, a posição {estado1}x{estado2} recebe um 0, matriz atualizada:')
+                matriz[estado1][estado2] = 0
+            mostra_matriz(matriz)
+
+    print('\n\nMatriz após a primeira etapa:\n')
+    mostra_matriz(matriz)
+    print("Ou, de forma mais compacta:")
+    mostra_diagona_inferior(matriz)
+    
+        
+# #################################################
+
+
+
 def main():
+
+    
     # Ler o AFD de um arquivo
     afd = ler_afd('afd.txt')
 
@@ -174,11 +242,14 @@ def main():
     # Validar o AFD
     if validar_afd(afd):
         print("AFD válido!")
+        print('\nPRIMEIRA ETAPA DO ALGORITMO DE MYHILL-NERODE\n')
         
         # (Aqui fica o código do algoritmo Myhill-Nerode)
 
         # Cria uma "matriz", onde seus indices serão os estados do AFD e a preenche completamente com -1
         matriz = {estado: {estado_destino: -1 for estado_destino in afd['estados']} for estado in afd['estados']}
+
+        passo = 0
         
         #
         # Percorre toda a matriz, mantendo os elementos da diagonal principal para cima com -1 (que serão ignorados no algoritmo), e adicionando 0 ou 1:
@@ -189,12 +260,31 @@ def main():
         #  
         for i in afd['estados']:
             for j in afd['estados']:
-                if (i == j): # Ignora as células da diagonal principal para cima
+                passo += 1
+                print('-' * 50)
+                print(f'Passo {passo}: comparando o estado {i} e o estado {j}\n')
+                if i == j:
+                    print('Os estados são iguais então ignoramos.')
                     break
-                if (i in afd['finais']) != (j in afd['finais']): # Se apenas um dos estados for final, adiciona 1 na célula
+
+                # Se o par de estados contiver exclusivamente um estado final, a matriz é marcada com 1
+                if (i in afd['finais']) != (j in afd['finais']):
+                    print(f'O estado {i} {'é' if i in afd['finais'] else 'não é'} final e o')
+                    print(f'estado {j} {'é' if j in afd['finais'] else 'não é'} final')
+                    print(f'Logo, a posição {i}x{j} recebe um 1, matriz atualizada:')
                     matriz[i][j] = 1
-                else: # Adiciona 0 caso contrário
+                # Caso contrário, é marcada com 0
+                else:
+                    print(f'O estado {i} {'é' if i in afd['finais'] else 'não é'} final e o')
+                    print(f'estado {j} {'é' if j in afd['finais'] else 'não é'} final')
+                    print(f'Logo, a posição {i}x{j} recebe um 0, matriz atualizada:')
                     matriz[i][j] = 0
+                mostra_matriz(matriz)
+
+        print('\n\nMatriz após a primeira etapa:\n')
+        mostra_matriz(matriz)
+        print("Ou, de forma mais compacta:")
+        mostra_diagona_inferior(matriz)
             
         # Implementação do algoritmo
         # 
@@ -203,21 +293,45 @@ def main():
         # O resultado é um outro par de estados. Se esse par resultante estiver marcado com 1 na matriz, o par inicial será também marcado na matriz, do contrário nada será feito
         #
 
+        print('\n\nSEGUNDA ETAPA DO ALGORITMO DE MYHILL-NERODE')
+        print('Derivando os pares de estados não marcados na matriz:\n')
+        passo = 0
+        
         for i in afd['estados']:
             for j in afd['estados']:
+                passo += 1
+                print('-' * 50)
                 if (i == j): # Ignora a diagonal principal para cima
+                    print(f'Passo {passo}: Os estados {i} e {j} são iguais, então ignoramos.')
                     break
+                if matriz[i][j] == 1:
+                    print(f'Passo {passo}: O par de estados {i} e {j} já está marcado na matriz, então ignoramos.')
+                    continue
                 if matriz[i][j] == 0: # Se o par de estados não estiver marcado na matriz, fará a derivação
+                    print(f'Passo {passo}: Derivando o par de estados {i} e {j}\n')
                     for simbo in afd['alfa']: # Faz a transição de cada estado do par para cada símbolo do alfabeto
                         q1 = afd['transicoes'][i][simbo]
                         q2 = afd['transicoes'][j][simbo]
-
+                        print(f'{i} lendo {simbo} vai para {q1}')
+                        print(f'{j} lendo {simbo} vai para {q2}')
                         if (matriz[q1][q2] == 1): # Se o par gerado estiver marcado na matriz, o par original também será marcadao
                             matriz[i][j] = 1
+                            print(f'O par de estados {i} e {j} com o simbolo {simbo} foi derivado para o par de estados {q1} e {q2}')
+                            print(f'que está marcado na matriz, então o par {i} e {j} também será marcado.')
                             continue
-                        
+                        elif (matriz[q1][q2] != 1): # Se o par gerado não estiver marcado na matriz, imprime uma mensagem
+                            print(f'O par de estados {i} e {j} com o simbolo {simbo} foi derivado para o par de estados {q1} e {q2}')
+                            print(f'que não está marcado na matriz, então o par {i} e {j} não será marcado.')
+                            continue
                         if (matriz[q2][q1] == 1): # Como a maior parte da matriz é ignorada, é necessário testar o par ao contrário também
                             matriz[i][j] = 1
+                            print(f'O par de estados {i} e {j} com o simbolo {simbo} foi derivado para o par de estados {q1} e {q2}')
+                            print(f'que está marcado na matriz, então o par {i} e {j} também será marcado.')
+                            continue
+                        elif (matriz[q2][q1] != 1): # Se o par gerado não estiver marcado na matriz, imprime uma mensagem
+                            print(f'O par de estados {i} e {j} com o simbolo {simbo} foi derivado para o par de estados {q1} e {q2}')
+                            print(f'que não está marcado na matriz, então o par {i} e {j} não será marcado.')
+                            continue
 
         """
         ===================================================================================================================
