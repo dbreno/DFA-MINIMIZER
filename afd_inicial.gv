@@ -1,0 +1,26 @@
+// afd_inicial
+digraph {
+	rankdir=LR
+	size="11.69,8.27"
+	ratio=fill
+	inicio [label="" shape=point]
+	A [label=A]
+	B [label=B]
+	C [label=C shape=doublecircle]
+	D [label=D shape=doublecircle]
+	E [label=E shape=doublecircle]
+	F [label=F]
+	inicio -> A
+	A -> B [label=0]
+	A -> C [label=1]
+	B -> A [label=0]
+	B -> D [label=1]
+	C -> E [label=0]
+	C -> F [label=1]
+	D -> E [label=0]
+	D -> F [label=1]
+	E -> E [label=0]
+	E -> F [label=1]
+	F -> F [label="0
+1"]
+}
