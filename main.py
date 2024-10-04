@@ -405,6 +405,7 @@ def preenche_transicoes(afd, estadosAfdMin):
             transicoesAfdMin[estadoPartida][simbo] = estado_destino
 
             # Exibe a transição no terminal
+            print('-' * 50)
             print(f"Preenchendo transição: {estadoPartida} --{simbo}--> {estado_destino}")
             print(f"Explicação: O estado {estadoPartida} contém o estado {estado1} do AFD original.")
             print(f"Para o símbolo '{simbo}', o estado {estado1} transita para {afd['transicoes'][estado1][simbo]} no AFD original.")
@@ -469,6 +470,8 @@ def myhill_nerode(afd):
 
 #################################################################################################
 
+import json
+
 def main():
 
     afd = ler_afd('afd.txt') # Lê o AFD de um arquivo
@@ -478,6 +481,12 @@ def main():
     afd_minimizado = myhill_nerode(afd) # Recebe a estrutura do afd minimizado pelo algoritmo
 
     exibir_diagrama_afd(afd_minimizado, "afd_minimizado") # Exibe o AFD minimizado
+
+    afd_formatado = json.dumps(afd_minimizado, indent=4)
+
+    print("Modelo do AFD minimizado: ")
+
+    print(afd_formatado)
 
 if __name__ == "__main__":
     main()
