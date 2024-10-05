@@ -52,6 +52,11 @@ def ler_afd(arquivo):
             if origem not in afd['transicoes']:
                 afd['transicoes'][origem] = {}
 
+            # Verifica se já existe uma transição para o mesmo símbolo
+            if simbolo in afd['transicoes'][origem]:
+                print(f"Erro: Estado '{origem}' já possui uma transição para o símbolo '{simbolo}'.")
+                return None  # Retorna um AFD inválido
+
             # Adiciona a transição para o símbolo fornecido
             afd['transicoes'][origem][simbolo] = destino
 
@@ -74,50 +79,43 @@ def validar_afd(afd):
 
     # Verifica se todos os estados finais estão nos estados
     for final in afd['finais']:
-        # Para cada estado final, verifica se ele está na lista de estados
         if final not in afd['estados']:
-            # Se algum estado final não estiver na lista de estados, imprime um erro e retorna False
             print(f"Erro: Estado final '{final}' não está nos estados.")
             return False
 
     # Verifica se todas as transições são válidas
-    for origem, transicoes in afd['transicoes'].items():
-
-        # Para cada estado de origem nas transições, verifica se ele está na lista de estados
-        if origem not in afd['estados']:
-            # Se o estado de origem não estiver na lista de estados, imprime um erro e retorna False
-            print(f"Erro: Estado '{origem}' não está nos estados.")
+    for origem in afd['estados']:
+        if origem not in afd['transicoes']:
+            print(f"Erro: Estado '{origem}' não possui transições.")
             return False
         
-        # Verifica se o dicionário de transições tem a mesma quantidade de símbolos que o alfabeto
+        transicoes = afd['transicoes'][origem]
+
+        # Verifica se o número de transições é igual ao número de símbolos no alfabeto
         if len(transicoes) != len(afd['alfa']):
             print(f"Erro: Estado '{origem}' não possui transições para todos os símbolos do alfabeto.")
             return False
 
-        simbolos_vistos = {}
+        # Verifica se há mais de uma transição para o mesmo símbolo
+        simbolos_vistos = set()
         for simbolo, destino in transicoes.items():
-            # Para cada transição, verifica se o estado de destino está na lista de estados
+            # Verifica se o destino é um estado válido
             if destino not in afd['estados']:
-                # Se o estado de destino não estiver na lista de estados, imprime um erro e retorna False
-                print(f"Erro: Destino '{destino}' não está nos estados.")
+                print(f"Erro: O estado destino '{destino}' na transição do estado '{origem}' não é um estado válido.")
                 return False
-            # Verifica se o símbolo da transição está no alfabeto
-            if simbolo not in afd['alfa']:
-                # Se o símbolo não estiver no alfabeto, imprime um erro e retorna False
-                print(f"Erro: Símbolo '{simbolo}' não está no alfabeto.")
-                return False
-            
-            if simbolo in simbolos_vistos:
-                simbolos_vistos[simbolo] += 1
-            else:
-                simbolos_vistos[simbolo] = 1
 
-        # Verifica se algum símbolo aparece mais de uma vez
-        for simbolo, quantidade in simbolos_vistos.items():
-            if quantidade > 1:
-                    print(f"Erro: Símbolo '{simbolo}' aparece mais de uma vez nas transições do estado '{origem}'.")
-                    return False
-               
+            # Verifica se o símbolo está no alfabeto
+            if simbolo not in afd['alfa']:
+                print(f"Erro: O símbolo '{simbolo}' não pertence ao alfabeto.")
+                return False
+
+            # Verifica se o símbolo já foi usado
+            if simbolo in simbolos_vistos:
+                print(f"Erro: O estado '{origem}' possui mais de uma transição para o símbolo '{simbolo}'.")
+                return False
+
+            simbolos_vistos.add(simbolo)
+
     # Se todas as verificações passarem, retorna True
     return True
 
@@ -314,7 +312,6 @@ def condensa_estados(afd, matriz):
 
     # Faz a junção de todos os estados do AFD minimizado que possuem alguma interseção de estados do AFD original
     
-    
     print('\nVamos olhar para as interseções nos estados agora:\n')
     
     i = 0
@@ -394,10 +391,10 @@ def preenche_transicoes(afd, estadosAfdMin):
         # Para cada símbolo no alfabeto do AFD
         for simbo in afd['alfa']:
             # Encontra o primeiro estado no conjunto de estados minimizados que corresponde à transição
-            for estado1 in estadoPartida:
+            for estado1 in estadoPartida.split(', '):  # Aqui garantimos que cada estado dentro do estadoPartida seja tratado corretamente como string
                 estado_destino = next(
                     estado for estado in estadosAfdMin
-                    if afd['transicoes'][estado1][simbo] in estado
+                    if afd['transicoes'][estado1][simbo] in estado.split(', ')
                 )
                 break
 
@@ -412,6 +409,7 @@ def preenche_transicoes(afd, estadosAfdMin):
             print(f"Portanto, no AFD minimizado, o estado {estadoPartida} transita para {estado_destino} com o símbolo '{simbo}'.\n")
 
     return transicoesAfdMin
+
 
 def myhill_nerode(afd):
     # Implementação do algoritmo
@@ -430,6 +428,10 @@ def myhill_nerode(afd):
 
         # Cria uma "matriz", onde seus indices serão os estados do AFD e a preenche completamente com -1
         matriz = {estado: {estado_destino: -1 for estado_destino in afd['estados']} for estado in afd['estados']}
+
+        print("Matriz inicial: ")
+        print("\n")
+        mostra_matriz(matriz)
 
         # Faz o setup inicial da matriz: marcando com 1 os pares de estados que contiverem somente um estado final, e marcando com 0 caso contrário
         preenche_matriz_inicial(afd, matriz)
@@ -466,27 +468,28 @@ def myhill_nerode(afd):
 
     else:
         print("AFD inválido. Corrija o arquivo e tente novamente.")
-        return
+        return {}
 
 #################################################################################################
 
 import json
 
 def main():
+    afd = ler_afd('afd.txt')  # Lê o AFD de um arquivo
 
-    afd = ler_afd('afd.txt') # Lê o AFD de um arquivo
+    if afd is None:
+        print("Erro ao carregar o AFD. Verifique o arquivo de entrada.")
+        return
 
-    exibir_diagrama_afd(afd, "afd_inicial") # Exibe o AFD incial
-
-    afd_minimizado = myhill_nerode(afd) # Recebe a estrutura do afd minimizado pelo algoritmo
-
-    exibir_diagrama_afd(afd_minimizado, "afd_minimizado") # Exibe o AFD minimizado
-
-    afd_formatado = json.dumps(afd_minimizado, indent=4)
-
-    print("Modelo do AFD minimizado: ")
-
-    print(afd_formatado)
+    if validar_afd(afd):
+        exibir_diagrama_afd(afd, "afd_inicial")  # Exibe o AFD inicial
+        afd_minimizado = myhill_nerode(afd)  # Recebe a estrutura do afd minimizado pelo algoritmo
+        exibir_diagrama_afd(afd_minimizado, "afd_minimizado")  # Exibe o AFD minimizado
+        afd_formatado = json.dumps(afd_minimizado, indent=4)
+        print("Modelo do AFD minimizado: ")
+        print(afd_formatado)
+    else:
+        print("AFD inválido. Corrija o arquivo e tente novamente.")
 
 if __name__ == "__main__":
     main()
