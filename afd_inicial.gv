@@ -21,6 +21,8 @@ digraph {
 	q3 -> q5 [label=1]
 	q4 -> q5 [label=0]
 	q4 -> q3 [label=1]
-	q5 -> q4 [label=0]
+	q5 -> q5 [label=0]
 	q5 -> q3 [label=1]
+	q6 -> q1 [label=0]
+	q6 -> q2 [label=1]
 }

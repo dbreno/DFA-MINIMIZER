@@ -83,6 +83,12 @@ def validar_afd(afd):
             print(f"Erro: Estado final '{final}' não está nos estados.")
             return False
 
+    # Verifica se todos os estados das transições são válidos
+    for estado in afd['transicoes']:
+        if not estado in afd['estados']:
+            print(f"Erro: Estado '{estado}' não está nos estados válidos.")
+            return False
+
     # Verifica se todas as transições são válidas
     for origem in afd['estados']:
         if origem not in afd['transicoes']:
